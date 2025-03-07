@@ -24,6 +24,7 @@ function App() {
   const [contract, setContract] = useState(null);
   const [account, setAccount] = useState(null);
   const [isIssuer, setIsIssuer] = useState(false);
+  const [cubes, setCubes] = useState([]);
 
   const connectWallet = async () => {
     try {
@@ -80,11 +81,57 @@ function App() {
     connectWallet(); // Auto-connect on component mount
   }, []);
 
+  const createCube = () => {
+    const size = Math.random() * 20 + 10;
+    return {
+      id: Math.random(),
+      size,
+      left: Math.random() * 100,
+      animationDuration: Math.random() * 10 + 5,
+      delay: Math.random() * 5
+    };
+  };
+
+  useEffect(() => {
+    const numberOfCubes = 15;
+    const newCubes = Array.from({ length: numberOfCubes }, () => createCube());
+    setCubes(newCubes);
+
+    const intervalId = setInterval(() => {
+      setCubes(prevCubes => {
+        const newCubes = [...prevCubes];
+        const replaceIndex = Math.floor(Math.random() * newCubes.length);
+        newCubes[replaceIndex] = createCube();
+        return newCubes;
+      });
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <Router>
       <div className="App">
+        <div className="blockchain-cubes">
+          {cubes.map(cube => (
+            <div
+              key={cube.id}
+              className="cube"
+              style={{
+                width: `${cube.size}px`,
+                height: `${cube.size}px`,
+                left: `${cube.left}%`,
+                animationDuration: `${cube.animationDuration}s`,
+                animationDelay: `${cube.delay}s`
+              }}
+            />
+          ))}
+        </div>
+
         <header className="App-header">
-          <h1>Decentralized Skill Certification</h1>
+          <h1 data-text="Decentralized Skill Certification">
+            Decentralized Skill Certification
+          </h1>
           <ConnectWallet 
             account={account} 
             onConnect={connectWallet} 
